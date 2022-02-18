@@ -1,0 +1,193 @@
+---
+title: "A3"
+author: "Tora Mullings"
+date: "2/18/2022"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Load required libraries.
+### tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+
+# 1. 
+
+### Read CSV file from Fivethirtyeight's Github repo. Take a subset including the names of the majors.
+
+```{r}
+filename <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
+
+majors <- read.csv(filename, header=TRUE, sep=",")
+
+majors <- subset(majors, select=2)
+
+
+
+```
+
+### Use gsub() with regex to clean the data.
+```{r}
+y <-gsub(pattern = "\"", replacement = "", majors)
+y <- gsub(pattern = "\\n", replacement="", y)
+
+z <- str_split(y, ", ")
+
+```
+
+### Loop through the majors, looking for the ones containing the keywords `DATA` or `STATISTICS`.
+```{r}
+a <- data.frame(as.list(z))
+
+
+for (i in 1:nrow(a)) {
+  m <- a[i,1]
+  if (length(grep("DATA", m)) != 0) {
+    print(m)
+  }
+  if (length(grep("STATISTICS", m)) != 0) {
+    print(m)
+  }
+}
+```
+
+
+# 2.
+
+### Input string to be transformed:
+```{r}
+a <- '[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+[13] "olive"        "salal berry"'
+
+```
+
+### Regex for cleaning the string
+```{r}
+
+x <-a 
+
+b <- gsub('(\n)|(\\[|\\])|[0-9]', '', x)
+
+b <- gsub('(\\s+)', ' ', b)
+
+
+b <- gsub('\" ', '\", ', b)
+
+c <-paste('c(', b ,')',sep="")
+c <- gsub("c\\( ", "c\\(", c)
+
+
+```
+
+
+### Finally, use writeLines() to see the raw transformed string.
+```{r}
+writeLines(c)
+```
+
+
+# 3.
+### Describe what the expressions will match.
+
+`(.)\1\1`
+```{r}
+#1 
+z <- c("aabbc", "aba","a\1\1" ,"bcc", "xcccx", "church", "bcb", "ffffffxyzhhhhhhhf", "k", "banana", "eleven")
+str_view(z, "(.)\1\1", match=TRUE)
+
+```
+This matches any character followed by 2 Start of Header (SOH) characters.
+
+
+
+`"(.)(.)\\2\\1"`
+```{r}
+#2 
+z <- c("aabbc", "aba","a\1\1" ,"bcc", "xcccx", 
+       "church", "bcb", "fxyzhhhhhhhf", 
+       "k", "banana", "eleven", "naabbm",
+       "abba", "\"woow\"")
+str_view(z, '"(.)(.)\\2\\1"', match=TRUE)
+
+```
+This matches any string that contains a 4-character palindrome enclosed by double quotes. In other words, it will match strings that go forward the same as backwards with " on both ends.
+
+
+
+`(..)\1`
+```{r}
+#3
+z <- c("aabbc", "aba","a\1\1" ,"bcc", "xcccx", 
+       "church", "bcb", "aabjjjj", "hijklmnmn","ffffffxyzhhhhhhhf", 
+       "k", "banana", "eleven", "ab\1", "bb\1", "cc", "gfrt\1",
+       "abba")
+str_view(z, "(..)\1", match=TRUE)
+
+```
+This will match any string that contains two characters followed by a SOH character.
+
+
+
+`"(.).\\1.\\1"`
+```{r}
+#4
+z <- c("aabbc", "aba","a\1\1" ,"bcc", "xcccx", 
+       "church", "bcb", "aabjjjj", "hijklmnmn","ffffffxyzhhhhhhhf", 
+       "k", "banana", "eleven", "ab\1", "bb\1", "cc", "gfrt\1",
+       "abba", "abaca", "\"abaca\"")
+
+str_view(z, '"(.).\\1.\\1"', match=TRUE)
+```
+This will match a string enclosed in double quotes with a character that repeats twice with 1 character between each repetition.
+
+
+
+`"(.)(.)(.).*\\3\\2\\1"`
+This will match a string that contains a substring enclosed within double quotes, that starts with 3 characters, then has any number of random other characters, then has the same first 3 characters mirrored. In other words, the substring is like a palindrome, except the reflection happens after some random characters in between.
+
+
+# 4. 
+### Construct regular expressions to match words that:
+
+Start and end with the same character.
+```{r}
+x <- c("abc", "aba", "bcc", "bcb", "ffffffxyzhhhhhhhf", "k")
+str_view(x, "^(.).*\\1$", match=TRUE)
+
+```
+
+
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+```{r}
+y <- c("aabbc", "aba", "bcc", "church", "bcb", "ffffffxyzhhhhhhhf", "k")
+str_view(y, ".*(..).*(..).*", match=TRUE)
+```
+
+
+Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+```{r}
+z <- c("aabbc", "aba", "bcc", "church", "bcb", "ffffffxyzhhhhhhhf", "k", "banana", "eleven")
+str_view(z, ".*(.).*\\1.*\\1.*", match=TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
